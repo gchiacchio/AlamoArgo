@@ -10,12 +10,9 @@
 Pod::Spec.new do |s|
   s.name             = "AlamoArgo"
   s.version          = "0.2.0"
-  s.summary          = "A short description of AlamoArgo."
+  s.summary          = "REST object mapping with Alamofire and Argo. The easy way."
   s.description      = <<-DESC
-                       An optional longer description of AlamoArgo
-
-                       * Markdown format.
-                       * Don't worry about the indent, we strip it!
+                       Alamofire extensions to handle responses with Argo's `Decodable` objects.
                        DESC
   s.homepage         = "https://github.com/gchiacchio/AlamoArgo"
   # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
