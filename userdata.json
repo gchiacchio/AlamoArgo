@@ -1,12 +1,12 @@
 {
     "user": {
         "id": 1,
-        "name": "John Doe"
-        "role": "User"
+        "name": "John Doe",
+        "role": "User",
         "company": {
             "name": "Company Name Co."
             "address": "123 Fake St."
-        }
+        },
         "friends" : []
     }
 }
