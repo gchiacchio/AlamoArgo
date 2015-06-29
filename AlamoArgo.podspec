@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AlamoArgo"
-  s.version          = "0.1.0"
+  s.version          = "0.2.0"
   s.summary          = "A short description of AlamoArgo."
   s.description      = <<-DESC
                        An optional longer description of AlamoArgo
