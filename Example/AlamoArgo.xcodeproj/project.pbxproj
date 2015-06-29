@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2D1E7D18D70C03967B495BC8 /* Pods_AlamoArgo_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C588E78392C5BE39828549E5 /* Pods_AlamoArgo_Tests.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		B39A44671B4192F200812766 /* userdata.json in Resources */ = {isa = PBXBuildFile; fileRef = B39A44661B4192F200812766 /* userdata.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		7C9F1DBB519AD1546758B47D /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		8B9DC414FE138892ABCA07BB /* AlamoArgo.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = AlamoArgo.podspec; path = ../AlamoArgo.podspec; sourceTree = "<group>"; };
+		B39A44661B4192F200812766 /* userdata.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = userdata.json; path = ../userdata.json; sourceTree = "<group>"; };
 		C4FD493333C41CD112E7275F /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		C588E78392C5BE39828549E5 /* Pods_AlamoArgo_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AlamoArgo_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCD206287C1669EDC4C8A277 /* Pods-AlamoArgo_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AlamoArgo_Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-AlamoArgo_Tests/Pods-AlamoArgo_Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -38,6 +40,7 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				B39A44661B4192F200812766 /* userdata.json */,
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACE81AFB9204008FA782 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
@@ -159,6 +162,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B39A44671B4192F200812766 /* userdata.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
