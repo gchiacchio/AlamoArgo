@@ -4,7 +4,7 @@
         "name": "John Doe",
         "role": "User",
         "company": {
-            "name": "Company Name Co."
+            "name": "Company Name Co.",
             "address": "123 Fake St."
         },
         "friends" : []
