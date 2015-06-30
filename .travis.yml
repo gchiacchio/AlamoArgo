@@ -12,5 +12,5 @@ before_install:
 install:
 - gem install xcpretty --no-rdoc --no-ri --no-document --quiet
 script:
-- set -o pipefail && xcodebuild test -workspace Example/AlamoArgo.xcworkspace -scheme AlamoArgo_Tests -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO -destination 'platform=iOS Simulator,name=iPhone 6' | xcpretty -c
+- set -o pipefail && xcodebuild test -workspace Example/AlamoArgo.xcworkspace -scheme AlamoArgo_Tests -sdk iphonesimulator8.3 ONLY_ACTIVE_ARCH=NO -destination 'platform=iOS Simulator,name=iPhone 5' | xcpretty -c
 - pod lib lint --quick
