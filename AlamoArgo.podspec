@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AlamoArgo"
-  s.version          = "0.2.1"
+  s.version          = "0.2.3"
   s.summary          = "REST object mapping with Alamofire and Argo. The easy way."
   s.description      = <<-DESC
                        Alamofire extensions to handle responses with Argo's `Decodable` objects.
