@@ -24,7 +24,6 @@ class Tests: XCTestCase {
         let userJson: AnyObject? = json.valueForKeyPath("user")
         let expectedUser: User? = decode(userJson!)
         
-        
         // When
         Alamofire.request(.GET, URL)
         .responseDecodable(keyPath: "user") { (responseRequest, responseResponse, responseUser: User?, responseError) in
