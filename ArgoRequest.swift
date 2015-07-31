@@ -31,9 +31,9 @@ extension Request {
     
     :returns: Tuple representing the parsed result starting from **keyPath**, if present, and the corresponding error in case of any.
     */
-    private func jsonResponseSerializer(request: NSURLRequest, response: NSHTTPURLResponse?, data: NSData?, keyPath: String? = nil) -> (AnyObject?, NSError?) {
+    private func jsonResponseSerializer(request: NSURLRequest?, response: NSHTTPURLResponse?, data: NSData?, keyPath: String? = nil) -> (AnyObject?, NSError?) {
         let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
-        let (json: AnyObject?, serializationError) = JSONSerializer(request, response, data)
+        let (json: AnyObject?, serializationError) = JSONSerializer.serializeResponse(request, response, data)
         var jsonForPath: AnyObject? = json
         var error = serializationError
         if keyPath != nil {
@@ -59,13 +59,13 @@ extension Request {
     :returns: The `Request` instance.
     */
     public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void) -> Self {
-        let serializer: Serializer = { (request, response, data) in
+        let serializer = GenericResponseSerializer<T> { request, response, data in
             var (jsonForPath: AnyObject?, error) = self.jsonResponseSerializer(request, response: response, data: data, keyPath: keyPath)
             if let json: AnyObject = jsonForPath {
                 let obj: Decoded<T> = decode(json)
                 switch (obj) {
                 case let .Success(x):
-                    return (obj.value as? AnyObject, nil)
+                    return (obj.value, nil)
                 default:
                     error = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
                 }
@@ -73,9 +73,7 @@ extension Request {
             return (nil, error)
         }
         
-        return response(serializer: serializer, completionHandler: { (request, response, object, error) in
-            completionHandler(request, response, object as? T, error)
-        })
+        return response(responseSerializer: serializer, completionHandler: completionHandler)
     }
 
     /**
@@ -87,13 +85,13 @@ extension Request {
     :returns: The `Request` instance.
     */
     public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: (NSURLRequest, NSHTTPURLResponse?, [T]?, NSError?) -> Void) -> Self {
-        let serializer: Serializer = { (request, response, data) in
+        let serializer = GenericResponseSerializer<[T]> { request, response, data in
             var (jsonForPath: AnyObject?, error) = self.jsonResponseSerializer(request, response: response, data: data, keyPath: keyPath)
             if let json: AnyObject = jsonForPath {
                 let obj: Decoded<[T]> = decode(jsonForPath!)
                 switch (obj) {
                 case let .Success(x):
-                    return (obj.value as? AnyObject, nil)
+                    return (obj.value, nil)
                 default:
                     error = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
                 }
@@ -101,8 +99,6 @@ extension Request {
             return (nil, error)
         }
         
-        return response(serializer: serializer, completionHandler: { (request, response, object, error) in
-            completionHandler(request, response, object as? [T], error)
-        })
+        return response(responseSerializer: serializer, completionHandler: completionHandler)
     }
 }
