@@ -96,7 +96,7 @@ extension Request {
     
     - returns: The `Request` instance.
     */
-    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
+    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
         let serializer = ResponseSerializer<[T], NSError> { request, response, data, error in
             var myError = error
             let result: Result<AnyObject, NSError> = Request.jsonResponseSerializer(keyPath).serializeResponse(request, response, data, error)

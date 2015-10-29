@@ -47,6 +47,42 @@ class Tests: XCTestCase {
         }
     }
     
+    func testGETArray() {
+        // Given
+        let URL = "https://raw.githubusercontent.com/gchiacchio/AlamoArgo/master/userdata.json"
+        let expectation = expectationWithDescription("\(URL)")
+        
+        var request: NSURLRequest?
+        var response: NSHTTPURLResponse?
+        var friends: [User]?
+        var error: NSError?
+        
+        
+        // When
+        Alamofire.request(.GET, URL)
+            .responseDecodable(keyPath: "user.friends") { (responseF: Response<[User], NSError>) in
+                request = responseF.request
+                response = responseF.response
+                friends = responseF.result.value
+                error = responseF.result.error
+                
+                expectation.fulfill()
+        }
+        
+        waitForExpectationsWithTimeout(10, handler: nil)
+        
+        // Then
+        XCTAssertNotNil(request, "request should not be nil")
+        XCTAssertNotNil(response, "response should not be nil")
+        XCTAssertTrue(hasValue(friends), "friends should not be nil")
+        XCTAssertNil(error, "error should be nil")
+        
+        if let friends = friends {
+            XCTAssertGreaterThan(friends.count, 0)
+        }
+    }
+
+    
     func hasValue<T>(value: T?) -> Bool {
         switch (value) {
         case .Some(_): return true
