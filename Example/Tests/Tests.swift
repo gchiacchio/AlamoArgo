@@ -134,7 +134,7 @@ extension RoleType: Decodable {
     static func decode(j: JSON) -> Decoded<RoleType> {
         switch j {
         case let .String(s): return .fromOptional(RoleType(rawValue: s))
-        default: return Decoded<RoleType>.Failure(.TypeMismatch(expected: "String", actual: "\(j)")) // Provide an Error message for a string type mismatch
+        default: return .Failure(.TypeMismatch(expected: "String", actual: "\(j)")) // Provide an Error message for a string type mismatch
         }
     }
 }

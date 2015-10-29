@@ -43,7 +43,7 @@ extension User: Decodable {
             <*> j <|? "email" // Use ? for parsing optional values
             <*> j <| "role" // Custom types that also conform to Decodable just work
             <*> j <| ["company", "name"] // Parse nested objects
-            <*> j <|| "friends" // parse arrays of objects
+            <*> j <|| "friends" // Parse arrays of objects
     }
 }
 
@@ -56,7 +56,7 @@ extension RoleType: Decodable {
     static func decode(j: JSON) -> Decoded<RoleType> {
         switch j {
         case let .String(s): return .fromOptional(RoleType(rawValue: s))
-        default: return .TypeMismatch("\(j) is not a String") // Provide an Error message for a string type mismatch
+        default: return .Failure(.TypeMismatch(expected: "String", actual: "\(j)")) // Provide an Error message for a string type mismatch
         }
     }
 }
@@ -74,7 +74,22 @@ Alamofire.request(.GET, URL)
 	.responseDecodable(keyPath: "user") { 
 	(response: Response<User, NSError>) in
 	if let user = response.result.value {
-		println(user)	}
+		print(user)	}
+}
+```
+###3. Requesting friends array
+**keyPath** parameter allows to selectively parse a particular object inside JSON response. Default value is nil.
+
+```swift
+import AlamoArgo
+import Alamofire
+
+let URL = "https://raw.githubusercontent.com/gchiacchio/AlamoArgo/master/userdata.json"
+Alamofire.request(.GET, URL)
+	.responseDecodable(keyPath: "user.friends") { 
+	(response: Response<[User], NSError>) in
+	if let friends = response.result.value {
+		print(friends)	}
 }
 ```
 

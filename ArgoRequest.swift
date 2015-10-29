@@ -42,13 +42,21 @@ extension Request {
             
             
             let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
+            
             let result: Result<AnyObject, NSError> = JSONSerializer.serializeResponse(request, response, validData, error)
+            
             var jsonForPath: AnyObject? = result.value
-            var myError = result.error
+            
+            if let myError = result.error {
+                return .Failure(myError)
+            }
+            
             if let kp = keyPath {
                 jsonForPath = result.value?.valueForKeyPath(kp)
-                if jsonForPath == nil && myError == nil {
-                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:"No such path"])
+                if let jsonResult = jsonForPath {
+                    return .Success(jsonResult)
+                } else {
+                    return .Failure(NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:"No such path"]))
                 }
             }
             
@@ -56,7 +64,7 @@ extension Request {
                 return .Success(jsonResult)
             }
             
-            return .Failure(myError!)
+            return .Failure(NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [:]))
             
         }
     }
@@ -71,18 +79,26 @@ extension Request {
     */
     public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<T, NSError> -> Void) -> Self {
         let serializer = ResponseSerializer<T, NSError> { request, response, data, error in
-            var myError = error
+            if let myError = error {
+                return Result<T, NSError>.Failure(myError)
+            }
             let result: Result<AnyObject, NSError> = Request.jsonResponseSerializer(keyPath).serializeResponse(request, response, data, error)
+            if let myError = error {
+                return Result<T, NSError>.Failure(myError)
+            }
+            if let myError = result.error {
+                return Result<T, NSError>.Failure(myError)
+            }
             if let json: AnyObject = result.value {
                 let obj: Decoded<T> = decode(json)
                 switch (obj) {
                 case let .Success(value):
                     return Result<T, NSError>.Success(value)
                 default:
-                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
+                    return Result<T, NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description]))
                 }
             }
-            return Result<T, NSError>.Failure(myError!)
+            return Result<T, NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: -1, userInfo: nil))
         }
         
         return response(responseSerializer: serializer, completionHandler: completionHandler)
@@ -98,18 +114,26 @@ extension Request {
     */
     public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
         let serializer = ResponseSerializer<[T], NSError> { request, response, data, error in
-            var myError = error
+            if let myError = error {
+                return Result<[T], NSError>.Failure(myError)
+            }
             let result: Result<AnyObject, NSError> = Request.jsonResponseSerializer(keyPath).serializeResponse(request, response, data, error)
+            if let myError = error {
+                return Result<[T], NSError>.Failure(myError)
+            }
+            if let myError = result.error {
+                return Result<[T], NSError>.Failure(myError)
+            }
             if let json: AnyObject = result.value {
                 let obj: Decoded<[T]> = decode(json)
                 switch (obj) {
                 case let .Success(value):
                     return Result<[T], NSError>.Success(value)
                 default:
-                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
+                    return Result<[T], NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description]))
                 }
             }
-            return Result<[T], NSError>.Failure(myError!)
+            return Result<[T], NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: -1, userInfo: nil))
         }
         
         return response(responseSerializer: serializer, completionHandler: completionHandler)
