@@ -3,7 +3,6 @@ import XCTest
 import AlamoArgo
 import Alamofire
 import Argo
-import Runes
 
 class Tests: XCTestCase {
     
@@ -18,19 +17,19 @@ class Tests: XCTestCase {
         var error: NSError?
         
         let path = NSBundle(forClass: Tests.self).pathForResource("userdata", ofType: "json")
-        let data : NSData! = NSData(contentsOfFile:path!, options: .DataReadingMappedIfSafe, error: nil)
-        let json : AnyObject! =   NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(0), error: nil)
+        let data : NSData! = try? NSData(contentsOfFile:path!, options: .DataReadingMappedIfSafe)
+        let json : AnyObject! =   try? NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions(rawValue: 0))
         
         let userJson: AnyObject? = json.valueForKeyPath("user")
         let expectedUser: User? = decode(userJson!)
         
         // When
         Alamofire.request(.GET, URL)
-        .responseDecodable(keyPath: "user") { (responseRequest, responseResponse, responseUser: User?, responseError) in
-                request = responseRequest
-                response = responseResponse
-                user = responseUser
-                error = responseError
+            .responseDecodable(keyPath: "user") { (responseU: Response<User, NSError>) in
+                request = responseU.request
+                response = responseU.response
+                user = responseU.result.value
+                error = responseU.result.error
                 
                 expectation.fulfill()
         }
@@ -99,7 +98,7 @@ extension RoleType: Decodable {
     static func decode(j: JSON) -> Decoded<RoleType> {
         switch j {
         case let .String(s): return .fromOptional(RoleType(rawValue: s))
-        default: return .TypeMismatch("\(j) is not a String") // Provide an Error message for a string type mismatch
+        default: return Decoded<RoleType>.Failure(.TypeMismatch(expected: "String", actual: "\(j)")) // Provide an Error message for a string type mismatch
         }
     }
 }

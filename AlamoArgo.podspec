@@ -9,7 +9,7 @@
 
 Pod::Spec.new do |s|
   s.name             = "AlamoArgo"
-  s.version          = "0.3.0"
+  s.version          = "0.5.0"
   s.summary          = "REST object mapping with Alamofire and Argo. The easy way."
   s.description      = <<-DESC
                        Alamofire extensions to handle responses with Argo's `Decodable` objects.
@@ -28,6 +28,6 @@ Pod::Spec.new do |s|
 
   s.source_files = '*.swift'
 
-  s.dependency 'Alamofire', '~> 1.3'
-  s.dependency 'Argo', '~> 1.0'
+  s.dependency 'Alamofire', '~> 3.1'
+  s.dependency 'Argo', '~> 2.2'
 end

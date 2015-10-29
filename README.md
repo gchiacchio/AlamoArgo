@@ -72,8 +72,8 @@ import Alamofire
 let URL = "https://raw.githubusercontent.com/gchiacchio/AlamoArgo/master/userdata.json"
 Alamofire.request(.GET, URL)
 	.responseDecodable(keyPath: "user") { 
-	(request, response, responseUser: User?, error) in
-	if let user = responseUser {
+	(response: Response<User, NSError>) in
+	if let user = response.result.value {
 		println(user)	}
 }
 ```
@@ -81,7 +81,10 @@ Alamofire.request(.GET, URL)
 ## Requirements
 
 - iOS 8.0+ / Mac OS X 10.9+
-- Xcode 6.3
+- Xcode 7
+- Swift 2
+
+Note: For Swift 1.2 use version 0.3.0
 
 ## Installation
 

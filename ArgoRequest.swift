@@ -9,7 +9,6 @@
 import Foundation
 import Alamofire
 import Argo
-import Runes
 
 /// Constant defining the domain to be set in NSError instances.
 public let AlamoArgoErrorDomain = "AlamoArgo.err"
@@ -24,53 +23,66 @@ extension Request {
     /**
     JSON Response serializer with keyPath
     
-    :param: request  The `NSURLRequest`
-    :param: response The `NSHTTPURLResponse` obtained
-    :param: data     Raw data in the response
-    :param: keyPath  KeyPath to locate in the parsed JSON.
+    - parameter request:  The `NSURLRequest`
+    - parameter response: The `NSHTTPURLResponse` obtained
+    - parameter data:     Raw data in the response
+    - parameter keyPath:  KeyPath to locate in the parsed JSON.
     
-    :returns: Tuple representing the parsed result starting from **keyPath**, if present, and the corresponding error in case of any.
+    - returns: Tuple representing the parsed result starting from **keyPath**, if present, and the corresponding error in case of any.
     */
-    private func jsonResponseSerializer(request: NSURLRequest?, response: NSHTTPURLResponse?, data: NSData?, keyPath: String? = nil) -> (AnyObject?, NSError?) {
-        let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
-        let (json: AnyObject?, serializationError) = JSONSerializer.serializeResponse(request, response, data)
-        var jsonForPath: AnyObject? = json
-        var error = serializationError
-        if keyPath != nil {
-            jsonForPath = json?.valueForKeyPath(keyPath!)
-            if jsonForPath == nil && error == nil {
-                error = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:"No such path"])
+    public static func jsonResponseSerializer(keyPath: String? = nil) -> ResponseSerializer<AnyObject, NSError> {
+        return ResponseSerializer { request, response, data, error in
+            guard error == nil else { return .Failure(error!) }
+            
+            guard let validData = data else {
+                let failureReason = "Data could not be serialized. Input data was nil."
+                let error = Error.errorWithCode(.DataSerializationFailed, failureReason: failureReason)
+                return .Failure(error)
             }
-        }
-        if response != nil && jsonForPath != nil {
-            return (jsonForPath, nil)
-        } else {
-            return (nil, error)
+            
+            
+            let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
+            let result: Result<AnyObject, NSError> = JSONSerializer.serializeResponse(request, response, validData, error)
+            var jsonForPath: AnyObject? = result.value
+            var myError = result.error
+            if let kp = keyPath {
+                jsonForPath = result.value?.valueForKeyPath(kp)
+                if jsonForPath == nil && myError == nil {
+                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:"No such path"])
+                }
+            }
+            
+            if let jsonResult = jsonForPath {
+                return .Success(jsonResult)
+            }
+            
+            return .Failure(myError!)
+            
         }
     }
-
     
     /**
     Response handler called with the `Decoded` object, or error. This is the **single object** handler
     
-    :param: keyPath           KeyPath in JSON response where to start parsing to create the `Decodable` object
-    :param: completionHandler A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
+    - parameter keyPath:           KeyPath in JSON response where to start parsing to create the `Decodable` object
+    - parameter completionHandler: A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
     
-    :returns: The `Request` instance.
+    - returns: The `Request` instance.
     */
-    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: (NSURLRequest, NSHTTPURLResponse?, T?, NSError?) -> Void) -> Self {
-        let serializer = GenericResponseSerializer<T> { request, response, data in
-            var (jsonForPath: AnyObject?, error) = self.jsonResponseSerializer(request, response: response, data: data, keyPath: keyPath)
-            if let json: AnyObject = jsonForPath {
+    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<T, NSError> -> Void) -> Self {
+        let serializer = ResponseSerializer<T, NSError> { request, response, data, error in
+            var myError = error
+            let result: Result<AnyObject, NSError> = Request.jsonResponseSerializer(keyPath).serializeResponse(request, response, data, error)
+            if let json: AnyObject = result.value {
                 let obj: Decoded<T> = decode(json)
                 switch (obj) {
-                case let .Success(x):
-                    return (obj.value, nil)
+                case let .Success(value):
+                    return Result<T, NSError>.Success(value)
                 default:
-                    error = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
+                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
                 }
             }
-            return (nil, error)
+            return Result<T, NSError>.Failure(myError!)
         }
         
         return response(responseSerializer: serializer, completionHandler: completionHandler)
@@ -79,24 +91,25 @@ extension Request {
     /**
     Response handler called with the `Decoded` object, or error. This is the **array** handler
     
-    :param: keyPath           KeyPath in JSON response where to start parsing to create the `Decodable` object
-    :param: completionHandler A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
+    - parameter keyPath:           KeyPath in JSON response where to start parsing to create the `Decodable` object
+    - parameter completionHandler: A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
     
-    :returns: The `Request` instance.
+    - returns: The `Request` instance.
     */
-    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: (NSURLRequest, NSHTTPURLResponse?, [T]?, NSError?) -> Void) -> Self {
-        let serializer = GenericResponseSerializer<[T]> { request, response, data in
-            var (jsonForPath: AnyObject?, error) = self.jsonResponseSerializer(request, response: response, data: data, keyPath: keyPath)
-            if let json: AnyObject = jsonForPath {
-                let obj: Decoded<[T]> = decode(jsonForPath!)
+    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
+        let serializer = ResponseSerializer<[T], NSError> { request, response, data, error in
+            var myError = error
+            let result: Result<AnyObject, NSError> = Request.jsonResponseSerializer(keyPath).serializeResponse(request, response, data, error)
+            if let json: AnyObject = result.value {
+                let obj: Decoded<[T]> = decode(json)
                 switch (obj) {
-                case let .Success(x):
-                    return (obj.value, nil)
+                case let .Success(value):
+                    return Result<[T], NSError>.Success(value)
                 default:
-                    error = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
+                    myError = NSError(domain: AlamoArgoErrorDomain, code: 1, userInfo: [NSLocalizedDescriptionKey:obj.description])
                 }
             }
-            return (nil, error)
+            return Result<[T], NSError>.Failure(myError!)
         }
         
         return response(responseSerializer: serializer, completionHandler: completionHandler)

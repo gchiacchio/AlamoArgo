@@ -3,7 +3,7 @@ use_frameworks!
 
 
 target 'AlamoArgo_Tests', :exclusive => true do
-  pod "AlamoArgo", :path => "../"
+  pod "AlamoArgo", :path => ".."
 
   
 end
