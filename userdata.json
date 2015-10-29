@@ -7,6 +7,37 @@
             "name": "Company Name Co.",
             "address": "123 Fake St."
         },
-        "friends" : []
+        "friends" : [
+                     {
+                     "id": 2,
+                     "name": "Friend 1",
+                     "role": "User",
+                     "company": {
+                        "name": "Company Name Co.",
+                        "address": "123 Fake St."
+                     },
+                     "friends" : []
+                     },
+                     {
+                     "id": 3,
+                     "name": "Friend 2",
+                     "role": "Admin",
+                     "company": {
+                        "name": "Company Name Co.",
+                        "address": "123 Fake St."
+                     },
+                     "friends" : []
+                     },
+                     {
+                     "id": 4,
+                     "name": "Friend 3",
+                     "role": "User",
+                     "company": {
+                        "name": "Company Name Co.",
+                        "address": "123 Fake St."
+                     },
+                     "friends" : []
+                     }
+        ]
     }
 }
