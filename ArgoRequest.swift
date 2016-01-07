@@ -72,12 +72,13 @@ extension Request {
     /**
     Response handler called with the `Decoded` object, or error. This is the **single object** handler
     
+    - parameter queue:              The queue on which the completion handler is dispatched.
     - parameter keyPath:           KeyPath in JSON response where to start parsing to create the `Decodable` object
     - parameter completionHandler: A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
     
     - returns: The `Request` instance.
     */
-    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<T, NSError> -> Void) -> Self {
+    public func responseDecodable<T: Decodable where T == T.DecodedType>(queue queue: dispatch_queue_t? = nil, keyPath: String? = nil, completionHandler: Response<T, NSError> -> Void) -> Self {
         let serializer = ResponseSerializer<T, NSError> { request, response, data, error in
             if let myError = error {
                 return Result<T, NSError>.Failure(myError)
@@ -101,18 +102,19 @@ extension Request {
             return Result<T, NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: -1, userInfo: nil))
         }
         
-        return response(responseSerializer: serializer, completionHandler: completionHandler)
+        return response(queue: queue, responseSerializer: serializer, completionHandler: completionHandler)
     }
 
     /**
     Response handler called with the `Decoded` object, or error. This is the **array** handler
-    
+
+    - parameter queue:              The queue on which the completion handler is dispatched.
     - parameter keyPath:           KeyPath in JSON response where to start parsing to create the `Decodable` object
     - parameter completionHandler: A closure to be executed once the request has finished. The closure takes 4 arguments: the URL request, the URL response, if one was received, the `Decodable` object, if one could be created from the URL response and data, and any error produced while creating the `Decodable` object.
     
     - returns: The `Request` instance.
     */
-    public func responseDecodable<T: Decodable where T == T.DecodedType>(keyPath keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
+    public func responseDecodable<T: Decodable where T == T.DecodedType>(queue queue: dispatch_queue_t? = nil, keyPath: String? = nil, completionHandler: Response<[T], NSError> -> Void) -> Self {
         let serializer = ResponseSerializer<[T], NSError> { request, response, data, error in
             if let myError = error {
                 return Result<[T], NSError>.Failure(myError)
@@ -136,6 +138,6 @@ extension Request {
             return Result<[T], NSError>.Failure(NSError(domain: AlamoArgoErrorDomain, code: -1, userInfo: nil))
         }
         
-        return response(responseSerializer: serializer, completionHandler: completionHandler)
+        return response(queue: queue, responseSerializer: serializer, completionHandler: completionHandler)
     }
 }
