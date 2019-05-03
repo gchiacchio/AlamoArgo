@@ -76,6 +76,39 @@
         background: linear-gradient(to bottom, #34caca 5%, #30c9c9 100%);
         background-color: #34caca;
       }
+      .loading {
+        background-color: orange;
+      }
+      .success {
+        background-color: green;
+      }
+      .error {
+        background-color: #f44336;
+      }
+      /* The alert message box */
+      .alert {
+        padding: 20px;
+        /* background-color: #f44336; Red */
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      /* The close button */
+      .closebtn {
+        margin-left: 15px;
+        color: white;
+        font-weight: bold;
+        float: right;
+        font-size: 22px;
+        line-height: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      /* When moving the mouse over the close button */
+      .closebtn:hover {
+        color: black;
+      }
     </style>
     <script type="text/javascript">
       //auto expand textarea
@@ -85,15 +118,35 @@
       }
     </script>
     <script type="text/javascript">
+      function sendLoad() {
+        console.log(this.responseText);
+        result = document.getElementById("result");
+        alertBox = document.getElementById("alertBox");
+        alertBox.style.display = "block";
+        if (this.readyState == 4 && this.status > 400) {
+          alertBox.style.backgroundColor = "red";
+					result.textContent = this.statusText;
+        } else if (this.readyState == 4 && this.status <= 299) {
+          alertBox.style.backgroundColor = "green";
+					result.textContent = Success;
+        }
+      }
+
       function approveQABuild() {
-        alert("Sending Json");
+        result = document.getElementById("result");
+        result.textContent = "Sending";
+        alertBox = document.getElementById("alertBox");
+        alertBox.style.display = "block";
+        alertBox.style.backgroundColor = "orange";
+
         var xhr = new XMLHttpRequest();
+        xhr.onload = sendLoad;
         xhr.open(myForm.method, myForm.action + myForm.SHA.value, true);
         xhr.setRequestHeader(
           "Content-Type",
           "application/x-www-form-urlencoded"
         );
-        xhr.setRequestHeader("Authorization", "token " + myForm.token);
+        xhr.setRequestHeader("Authorization", "token " + myForm.token.value);
         xhr.setRequestHeader("Accept", "application/vnd.github.v3+json");
         var j = {
           state: "success",
@@ -109,6 +162,15 @@
   </head>
   <body>
     <div class="form-style-8">
+      <div class="alert" id="alertBox" style="display:'none'">
+        <span
+          class="closebtn"
+          onclick="this.parentElement.style.display='none';"
+          >&times;</span
+        >
+        <div id="result"></div>
+      </div>
+
       <h1>QA Build Distribution Approval</h1>
       <form
         action="https://api.github.com/repos/soulcycle/android-app/statuses/"
@@ -122,11 +184,19 @@
 
         <p>
           <label for="SHA">Build Commit SHA:</label>
-          <input type="text" name="SHA" id="SHA" size="50" />
+          <input type="text" name="SHA" id="SHA" id="SHA" size="50" />
         </p>
 
-        <input value="Aprove" type="button" onclick="approveQABuild()" />
+        <input value="Approve" type="button" onclick="approveQABuild()" />
       </form>
     </div>
+    <script>
+      var url_string = window.location.href;
+      var url = new URL(url_string);
+      var sha = url.searchParams.get("sha");
+      if (sha) {
+        document.getElementById("SHA").value = sha;
+      }
+    </script>
   </body>
 </html>
